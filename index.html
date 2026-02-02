@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Valentine?</title>
+  <meta charset="UTF-8">
+  <title>Will You Be My Valentine?</title>
+
   <style>
     * {
       box-sizing: border-box;
@@ -16,8 +17,44 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow: hidden;
     }
 
+    /* Floating Hearts */
+    .hearts {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .heart {
+      position: absolute;
+      bottom: -20px;
+      font-size: 20px;
+      animation: floatUp linear infinite;
+      opacity: 0.8;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-110vh) scale(1.5);
+        opacity: 0;
+      }
+    }
+
+    /* Main Card */
     .container {
       background: white;
       padding: 30px;
@@ -25,6 +62,8 @@
       text-align: center;
       box-shadow: 0 10px 30px rgba(0,0,0,0.15);
       width: 320px;
+      position: relative;
+      z-index: 2;
     }
 
     .image-container {
@@ -62,20 +101,86 @@
     #yesBtn {
       background-color: #ff4d6d;
       color: white;
-      margin-right: 10px;
     }
 
     #noBtn {
       background-color: #ccc;
       position: absolute;
     }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      animation: pop 0.3s ease;
+    }
+
+    .modal-content button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 20px;
+      background: #ff4d6d;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    @keyframes pop {
+      from {
+        transform: scale(0.7);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* Confetti */
+    .confetti {
+      position: fixed;
+      top: -10px;
+      width: 10px;
+      height: 10px;
+      animation: fall linear forwards;
+      z-index: 10;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(110vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
   </style>
 </head>
+
 <body>
 
+  <!-- Floating Hearts Background -->
+  <div class="hearts"></div>
+
+  <!-- Main Content -->
   <div class="container">
     <div class="image-container">
-      <!-- Replace this image with your own -->
+      <!-- Replace this with your own image -->
       <img src="toby.png" alt="Valentine Image">
     </div>
 
@@ -87,30 +192,84 @@
     </div>
   </div>
 
+  <!-- Modal -->
+  <div class="modal" id="valentineModal">
+    <div class="modal-content">
+      <h2>💖 Yay! 💖</h2>
+      <p>
+        Let's celebrate Valentine's Day<br>
+        <strong>February 14 @ Diamond Hotel<br>7:30 PM</strong>
+      </p>
+      <button onclick="closeModal()">OK</button>
+    </div>
+  </div>
+
   <script>
     const noBtn = document.getElementById("noBtn");
     const yesBtn = document.getElementById("yesBtn");
     const buttonsContainer = document.querySelector(".buttons");
+    const modal = document.getElementById("valentineModal");
+    const heartsContainer = document.querySelector(".hearts");
 
+    // No button escape
     noBtn.addEventListener("mouseover", () => {
-      const containerRect = buttonsContainer.getBoundingClientRect();
-      const btnRect = noBtn.getBoundingClientRect();
+      const maxX = buttonsContainer.offsetWidth - noBtn.offsetWidth;
+      const maxY = buttonsContainer.offsetHeight - noBtn.offsetHeight;
 
-      const maxX = containerRect.width - btnRect.width;
-      const maxY = containerRect.height - btnRect.height;
-
-      const randomX = Math.random() * maxX;
-      const randomY = Math.random() * maxY;
-
-      noBtn.style.left = randomX + "px";
-      noBtn.style.top = randomY + "px";
+      noBtn.style.left = Math.random() * maxX + "px";
+      noBtn.style.top = Math.random() * maxY + "px";
     });
 
+    // Yes button click
     yesBtn.addEventListener("click", () => {
-      alert("Let's celebrate Valentine's Day at Diamond Hotel 7:30 PM ❤️");
+      modal.style.display = "flex";
+      launchConfetti();
     });
+
+    function closeModal() {
+      modal.style.display = "none";
+    }
+
+    // Floating hearts generator
+    function createHeart() {
+      const heart = document.createElement("div");
+      heart.classList.add("heart");
+      heart.innerHTML = "❤️";
+      heart.style.left = Math.random() * 100 + "vw";
+      heart.style.fontSize = 16 + Math.random() * 24 + "px";
+      heart.style.animationDuration = 4 + Math.random() * 4 + "s";
+
+      heartsContainer.appendChild(heart);
+
+      setTimeout(() => {
+        heart.remove();
+      }, 8000);
+    }
+
+    setInterval(createHeart, 400);
+
+    // Confetti burst
+    function launchConfetti() {
+      for (let i = 0; i < 120; i++) {
+        const confetti = document.createElement("div");
+        confetti.classList.add("confetti");
+        confetti.style.left = Math.random() * 100 + "vw";
+        confetti.style.backgroundColor = randomColor();
+        confetti.style.animationDuration = 2 + Math.random() * 2 + "s";
+
+        document.body.appendChild(confetti);
+
+        setTimeout(() => {
+          confetti.remove();
+        }, 4000);
+      }
+    }
+
+    function randomColor() {
+      const colors = ["#ff4d6d", "#ffd166", "#06d6a0", "#118ab2", "#ef476f"];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
   </script>
 
 </body>
-
 </html>
